@@ -1,86 +1,96 @@
 import java.util.Scanner;
 
+// This class deals with registering a new user and logging them in
 public class Login {
-    //Scanner object used to read user input from the console
-    Scanner scanner = new Scanner(System.in);
 
-    //Variables to store user personal details and login credentials
+    // We use one scanner the whole time so we don't break the input
+    private Scanner scanner;
+
+    // These store the user's details after they register
     public String username;
     public String password;
     public String PhoneNumber;
     public String firstName;
     public String lastName;
 
+    // This runs when we create a new Login object, we pass the scanner in from Main
+    public Login(Scanner scanner) {
+        this.scanner = scanner;
+    }
 
-    //Method to check username contains an underscore and is no longer than 5 characters
-    public boolean checkUsername(String Username) {
+    // Checks the username has an underscore and is 5 chars or less
+    public boolean checkUserName(String Username) {
         return Username.contains("_") && Username.length() <= 5;
-
-    }
-    // Method to validate South African phone number format starting with +27
-    public boolean checkCellPhoneNumber() {
-        return PhoneNumber.matches("\\+27[0-9]{9}");
-
     }
 
-    //Method to ensure password meets complexity requirements (length,capital letter, number, special character)
+    // Checks the password has at least 8 chars, a capital, a number and a special character
     public boolean checkPasswordComplexity(String Password) {
         return Password.length() >= 8 &&
                 Password.matches(".*[A-Z].*") &&
                 Password.matches(".*[0-9].*") &&
-                Password.matches(".*[!@#$%^&*()].*");
+                Password.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?].*");
     }
 
-    //Method to check if user login details are available
+    // Checks the phone number starts with +27 and is exactly 12 characters long
+    // Regex reference: South African international number format (+27 followed by 9 digits)
+    // Source: https://www.regexlib.com/Search.aspx?k=south+africa+phone
+    public boolean checkCellPhoneNumber() {
+        return PhoneNumber != null && PhoneNumber.matches("\\+27[0-9]{9}");
+    }
+
+    // Checks if what the user typed matches what they registered with
     public boolean loginUser(String enteredUsername, String enteredPassword) {
-        return enteredUsername.equals(username) && enteredPassword.equals(password);
-
+        return username != null && password != null
+                && username.equals(enteredUsername)
+                && password.equals(enteredPassword);
     }
-    //Method that handles the full user registration process
-    public String Register() {
 
-        //Prompt to enter users first and last name
+    // Walks the user through the full registration process
+    public String registerUser() {
+
+        // Get their name
         System.out.println("please enter first name: ");
         firstName = scanner.nextLine();
-
         System.out.println("please enter last name: ");
         lastName = scanner.nextLine();
 
-        //Loop continues until a valid username is entered
+        // Keep asking for a username until they give a valid one
         do {
-            System.out.println("Please enter your username: (Username must contain and underscores and be no more than 5 characters long ");
+            System.out.println("Please enter your username: ");
             username = scanner.nextLine();
+            if (!checkUserName(username)) {
+                System.out.println("Username is not correctly formatted; please ensure that your username contains an underscore and is no more than five characters in length.");
+            }
+        } while (!checkUserName(username));
+        System.out.println("Username successfully captured.");
 
-        } while (!checkUsername(username));
-
-        //Loop continues until a valid password is entered
+        // Keep asking for a password until they give a valid one
         do {
-            System.out.println("please enter your password: (The password be 8 characters long, contain a capital letter, contain a number and a special character) ");
+            System.out.println("please enter your password: ");
             password = scanner.nextLine();
-
+            if (!checkPasswordComplexity(password)) {
+                System.out.println("Password is not correctly formatted; please ensure that the password contains at least eight characters, a capital letter, a number, and a special character.");
+            }
         } while (!checkPasswordComplexity(password));
+        System.out.println("Password successfully captured.");
 
-        //Loop continues until a valid phone number is entered
+        // Keep asking for a phone number until they give a valid one
         do {
-            System.out.println("Please enter your Phone Number (must contain the international country code and be no more than 10 characters long): ");
+            System.out.println("Please enter your Phone Number (+27838968967): ");
             PhoneNumber = scanner.nextLine();
-
+            if (!checkCellPhoneNumber()) {
+                System.out.println("Cell phone number incorrectly formatted or does not contain international code.");
+            }
         } while (!checkCellPhoneNumber());
+        System.out.println("Cell phone number successfully added.");
 
-        //Return a success message after registration is complete
         return "User has been successfully registered";
     }
 
-    //Checks that both username and password are not empty (user has entered login details)
-    public boolean loginUser() {
-        return username !=null && password != null;
-
-    }
-    //Returns a welcome message if login is successful, otherwise an error message
-    public String returnLoginUserStatus(String enteredUsername, String enteredPassword) {
-
+    // Returns a welcome message if login worked, or an error if it didn't
+    public String returnLoginStatus(String enteredUsername, String enteredPassword) {
         if (loginUser(enteredUsername, enteredPassword)) {
-            return "Welcome " + firstName + ", " + lastName + " it is great to see you again.";
+            return "Welcome " + firstName + " " + lastName + " it is great to see you again.";
         } else {
             return "Username or password incorrect, please try again.";
         }
